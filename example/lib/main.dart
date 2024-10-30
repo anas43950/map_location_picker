@@ -39,7 +39,7 @@ class _MyAppState extends State<MyApp> {
         children: [
           PlacesAutocomplete(
             searchController: _controller,
-            apiKey: YOUR_API_KEY,
+            apiKey: API_KEY,
             mounted: mounted,
             hideBackButton: true,
             debounceDuration: const Duration(milliseconds: 500),
@@ -68,8 +68,7 @@ class _MyAppState extends State<MyApp> {
                       debounceDuration: const Duration(milliseconds: 500),
                       onSelected: (value) {
                         setState(() {
-                          autocompletePlace =
-                              value.structuredFormatting?.mainText ?? "";
+                          autocompletePlace = value.structuredFormatting?.mainText ?? "";
                           initialValue = value;
                         });
                       },
@@ -124,7 +123,8 @@ class _MyAppState extends State<MyApp> {
                   MaterialPageRoute(
                     builder: (context) {
                       return MapLocationPicker(
-                        apiKey: YOUR_API_KEY,
+                        placesBaseUrl: "https://getdatafromurl-y3btppopua-uc.a.run.app",
+                        apiKey: API_KEY,
                         popOnNextButtonTaped: true,
                         currentLatLng: const LatLng(29.146727, 76.464895),
                         debounceDuration: const Duration(milliseconds: 500),
@@ -138,8 +138,7 @@ class _MyAppState extends State<MyApp> {
                         onSuggestionSelected: (PlacesDetailsResponse? result) {
                           if (result != null) {
                             setState(() {
-                              autocompletePlace =
-                                  result.result.formattedAddress ?? "";
+                              autocompletePlace = result.result.formattedAddress ?? "";
                             });
                           }
                         },

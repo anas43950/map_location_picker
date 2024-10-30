@@ -16,10 +16,13 @@ class AutoCompleteState {
   /// The current state of the autocomplete.
   List<Prediction> predictions = [];
 
+  final String Function(String url)? urlModifier;
+
   AutoCompleteState({
     this.httpClient,
     this.apiHeaders,
     this.baseUrl,
+    this.urlModifier,
   });
 
   /// void future function to get the autocomplete results.
@@ -85,6 +88,7 @@ class AutoCompleteState {
         sessionToken: sessionToken,
         strictbounds: strictbounds,
         types: types,
+        urlModifier: urlModifier,
       );
 
       /// When get any error from the API, show the error in the console.
