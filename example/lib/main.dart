@@ -123,7 +123,9 @@ class _MyAppState extends State<MyApp> {
                   MaterialPageRoute(
                     builder: (context) {
                       return MapLocationPicker(
-                        placesBaseUrl: "https://getdatafromurl-y3btppopua-uc.a.run.app",
+                        urlModifier: (String url) {
+                          return "Hello $url";
+                        },
                         apiKey: API_KEY,
                         popOnNextButtonTaped: true,
                         currentLatLng: const LatLng(29.146727, 76.464895),
