@@ -527,6 +527,7 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
                 /// Search text field
                 if (!widget.hideSearchBar)
                   PlacesAutocomplete(
+                    urlModifier: widget.urlModifier,
                     focusNode: widget.focusNode,
                     bottom: widget.bottom,
                     left: widget.left,
