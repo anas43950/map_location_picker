@@ -75,6 +75,7 @@ class AutoCompleteState {
         httpClient: httpClient,
         apiHeaders: apiHeaders,
         baseUrl: baseUrl,
+        urlModifier: urlModifier,
       );
       final PlacesAutocompleteResponse response = await places.autocomplete(
         query,
@@ -88,7 +89,6 @@ class AutoCompleteState {
         sessionToken: sessionToken,
         strictbounds: strictbounds,
         types: types,
-        urlModifier: urlModifier,
       );
 
       /// When get any error from the API, show the error in the console.
