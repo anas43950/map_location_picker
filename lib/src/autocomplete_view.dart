@@ -356,6 +356,7 @@ class _PlacesAutocompleteState extends State<PlacesAutocomplete> {
       apiHeaders: widget.placesApiHeaders,
       baseUrl: widget.placesBaseUrl,
       httpClient: widget.placesHttpClient,
+      urlModifier: widget.urlModifier,
     );
   }
 
