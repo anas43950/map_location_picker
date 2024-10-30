@@ -174,8 +174,7 @@ class PlacesAutocomplete extends StatefulWidget {
 
   final VerticalDirection direction;
 
-  final Widget Function(BuildContext, Animation<double>, Widget)?
-      transitionBuilder;
+  final Widget Function(BuildContext, Animation<double>, Widget)? transitionBuilder;
 
   /// If set to true, no loading box will be shown while suggestions are
   /// being fetched. [loadingBuilder] will also be ignored.
@@ -263,6 +262,7 @@ class PlacesAutocomplete extends StatefulWidget {
   final bool retainOnLoading;
   final bool showOnFocus;
   final SuggestionsController<Prediction>? suggestionsController;
+  final String Function(String url)? urlModifier;
 
   const PlacesAutocomplete({
     super.key,
@@ -342,6 +342,7 @@ class PlacesAutocomplete extends StatefulWidget {
     this.showOnFocus = true,
     this.suggestionsController,
     this.offsetParameter,
+    this.urlModifier,
   });
 
   @override
@@ -361,6 +362,7 @@ class _PlacesAutocompleteState extends State<PlacesAutocomplete> {
   late TextEditingController _controller;
 
   late Debouncer _debounce;
+
   @override
   void initState() {
     /// Get text controller from [searchController] or create new instance of [TextEditingController] if [searchController] is null or empty
@@ -393,9 +395,7 @@ class _PlacesAutocompleteState extends State<PlacesAutocomplete> {
         child: ListTile(
           minVerticalPadding: 0,
           contentPadding: const EdgeInsets.only(right: 4, left: 4),
-          leading: widget.hideBackButton
-              ? null
-              : widget.backButton ?? const BackButton(),
+          leading: widget.hideBackButton ? null : widget.backButton ?? const BackButton(),
           title: ClipRRect(
             borderRadius: widget.borderRadius,
             child: FormBuilderTypeAhead<Prediction>(
@@ -404,13 +404,12 @@ class _PlacesAutocompleteState extends State<PlacesAutocomplete> {
                     hintText: widget.searchHintText,
                     border: InputBorder.none,
                     filled: true,
-                    suffixIcon:
-                        (widget.showClearButton && widget.initialValue == null)
-                            ? IconButton(
-                                icon: const Icon(Icons.close),
-                                onPressed: () => _controller.clear(),
-                              )
-                            : widget.suffixIcon,
+                    suffixIcon: (widget.showClearButton && widget.initialValue == null)
+                        ? IconButton(
+                            icon: const Icon(Icons.close),
+                            onPressed: () => _controller.clear(),
+                          )
+                        : widget.suffixIcon,
                   ),
               name: 'Search',
               controller: widget.initialValue == null ? _controller : null,
@@ -429,8 +428,7 @@ class _PlacesAutocompleteState extends State<PlacesAutocomplete> {
                 }
                 final completer = Completer<List<Prediction>>();
                 _debounce.run(() async {
-                  List<Prediction> predictions =
-                      await autoCompleteState().search(
+                  List<Prediction> predictions = await autoCompleteState().search(
                     query,
                     widget.apiKey,
                     language: widget.language,
@@ -449,8 +447,7 @@ class _PlacesAutocompleteState extends State<PlacesAutocomplete> {
                 return completer.future;
               },
               onSelected: (value) async {
-                _controller.selection =
-                    TextSelection.collapsed(offset: _controller.text.length);
+                _controller.selection = TextSelection.collapsed(offset: _controller.text.length);
                 _getDetailsByPlaceId(value.placeId ?? "", context);
                 widget.onSelected?.call(value);
               },
@@ -525,8 +522,7 @@ class _PlacesAutocompleteState extends State<PlacesAutocomplete> {
         if (widget.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(response.errorMessage ??
-                  "Address not found, something went wrong!"),
+              content: Text(response.errorMessage ?? "Address not found, something went wrong!"),
             ),
           );
         }

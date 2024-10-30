@@ -292,6 +292,11 @@ class MapLocationPicker extends StatefulWidget {
   /// True if the map view should respond to zoom gestures.
   final bool zoomGesturesEnabled;
 
+  /// Use this function to modify the url to which the autocomplete request will be sent
+  /// @params url: final url generated in autocomplete request
+  /// @returns modified url
+  final String Function(String url)? urlModifier;
+
   final InputDecoration? decoration;
 
   final Widget? Function(
@@ -397,6 +402,7 @@ class MapLocationPicker extends StatefulWidget {
     this.decoration,
     this.bottomCardBuilder,
     this.debounceDuration = const Duration(milliseconds: 500),
+    this.urlModifier,
   });
 
   @override
@@ -477,8 +483,7 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
                 );
                 setState(() {});
               },
-              onMapCreated: (GoogleMapController controller) =>
-                  _controller.complete(controller),
+              onMapCreated: (GoogleMapController controller) => _controller.complete(controller),
               markers: {
                 Marker(
                   markerId: const MarkerId('one'),
@@ -497,8 +502,7 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
               cameraTargetBounds: widget.cameraTargetBounds,
               circles: widget.circles,
               cloudMapId: widget.cloudMapId,
-              fortyFiveDegreeImageryEnabled:
-                  widget.fortyFiveDegreeImageryEnabled,
+              fortyFiveDegreeImageryEnabled: widget.fortyFiveDegreeImageryEnabled,
               gestureRecognizers: widget.gestureRecognizers,
               indoorViewEnabled: widget.indoorViewEnabled,
               layoutDirection: widget.layoutDirection,
@@ -567,8 +571,7 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
                         placesDetails.result.geometry?.location.lng ?? 0,
                       );
                       final controller = await _controller.future;
-                      controller.animateCamera(
-                          CameraUpdate.newCameraPosition(cameraPosition()));
+                      controller.animateCamera(CameraUpdate.newCameraPosition(cameraPosition()));
                       _address = placesDetails.result.formattedAddress ?? "";
                       widget.onSuggestionSelected?.call(placesDetails);
 
@@ -578,8 +581,7 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
                       _geocodingResult = GeocodingResult(
                         geometry: placesDetails.result.geometry!,
                         placeId: placesDetails.result.placeId,
-                        addressComponents:
-                            placesDetails.result.addressComponents,
+                        addressComponents: placesDetails.result.addressComponents,
                         formattedAddress: placesDetails.result.formattedAddress,
                         types: placesDetails.result.types,
                       );
@@ -653,12 +655,10 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
                         /// get current location
                         if (widget.hasLocationPermission) {
                           await Geolocator.requestPermission();
-                          Position position =
-                              await Geolocator.getCurrentPosition(
+                          Position position = await Geolocator.getCurrentPosition(
                             desiredAccuracy: widget.desiredAccuracy,
                           );
-                          LatLng latLng =
-                              LatLng(position.latitude, position.longitude);
+                          LatLng latLng = LatLng(position.latitude, position.longitude);
                           _initialPosition = latLng;
                           final controller = await _controller.future;
 
@@ -683,8 +683,7 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
                     ),
                   ),
                 if (!widget.hideBottomCard)
-                  widget.bottomCardBuilder
-                          ?.call(context, _geocodingResult, _address) ??
+                  widget.bottomCardBuilder?.call(context, _geocodingResult, _address) ??
                       Card(
                         margin: widget.bottomCardMargin,
                         shape: widget.bottomCardShape,
@@ -705,8 +704,7 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
                                 },
                               ),
                             ),
-                            if (!widget.hideMoreOptions &&
-                                _geocodingResultList.isNotEmpty)
+                            if (!widget.hideMoreOptions && _geocodingResultList.isNotEmpty)
                               GestureDetector(
                                 onTap: () {
                                   showDialog(
@@ -716,15 +714,11 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
                                       scrollable: true,
                                       content: Column(
                                         mainAxisSize: MainAxisSize.min,
-                                        children:
-                                            _geocodingResultList.map((element) {
+                                        children: _geocodingResultList.map((element) {
                                           return ListTile(
-                                            title: Text(
-                                                element.formattedAddress ?? ""),
+                                            title: Text(element.formattedAddress ?? ""),
                                             onTap: () {
-                                              _address =
-                                                  element.formattedAddress ??
-                                                      "";
+                                              _address = element.formattedAddress ?? "";
                                               _geocodingResult = element;
                                               setState(() {});
                                               Navigator.pop(context, element);
@@ -812,8 +806,7 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(response.errorMessage ??
-                  "Address not found, something went wrong!"),
+              content: Text(response.errorMessage ?? "Address not found, something went wrong!"),
             ),
           );
         }
