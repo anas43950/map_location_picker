@@ -503,6 +503,7 @@ class _PlacesAutocompleteState extends State<PlacesAutocomplete> {
         httpClient: widget.placesHttpClient,
         apiHeaders: widget.placesApiHeaders,
         baseUrl: widget.placesBaseUrl,
+        urlModifier: widget.urlModifier,
       );
       final PlacesDetailsResponse response = await places.getDetailsByPlaceId(
         placeId,
