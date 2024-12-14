@@ -38,14 +38,14 @@ dependencies:
 
     google_maps_webapi:
         git: https://github.com/anas43950/google_maps_webapi.git
-    google_maps_flutter: ^2.9.0
+    google_maps_flutter: ^2.10.0
     form_builder_extra_fields: ^11.0.0
     flutter_typeahead: ^5.2.0
-    geolocator: ^13.0.1
+    geolocator: ^13.0.2
     http: ^1.2.2
-    logger: ^2.4.0
+    logger: ^2.5.0
 
 dev_dependencies:
     flutter_test:
         sdk: flutter
-    lints: ^4.0.0
+    lints: ^5.0.0

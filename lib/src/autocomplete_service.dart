@@ -107,8 +107,6 @@ class AutoCompleteState {
       /// Update the results with the new results.
       predictions = response.predictions;
 
-      logger.d(predictions.map((e) => e.toJson()).toList());
-
       /// Return the results.
       return predictions;
     } catch (err) {
