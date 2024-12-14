@@ -503,7 +503,12 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
                 onLongPress: widget.onLongPress,
                 polygons: widget.polygons.map((e) {
                   var polygon = Polygon(
+                    zIndex: e.zIndex,
+                    consumeTapEvents: e.consumeTapEvents,
+                    strokeWidth: e.strokeWidth,
                     points: e.points,
+                    fillColor: e.fillColor,
+                    strokeColor: e.strokeColor,
                     onTap: () {
                       Future.delayed(Duration.zero, () async {
                         final controller = await _controller.future;
