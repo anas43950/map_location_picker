@@ -297,6 +297,15 @@ class MapLocationPicker extends StatefulWidget {
   /// @returns modified url
   final String Function(String url)? urlModifier;
 
+  /// To show info window on pin or not
+  final bool? showInfoWindowOnPin;
+
+  /// Title for pin info window
+  final String? infoWindowTitle;
+
+  /// InfoWindow snippet builder for pin
+  final Future<String> Function(LatLng position)? infoWindowSnippetBuilder;
+
   final InputDecoration? decoration;
 
   final Widget? Function(
@@ -403,6 +412,9 @@ class MapLocationPicker extends StatefulWidget {
     this.bottomCardBuilder,
     this.debounceDuration = const Duration(milliseconds: 500),
     this.urlModifier,
+    this.showInfoWindowOnPin,
+    this.infoWindowTitle,
+    this.infoWindowSnippetBuilder,
   });
 
   @override
@@ -435,6 +447,8 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
 
   /// Search text field controller
   late TextEditingController _searchController = TextEditingController();
+
+  String? infoWindowSnippet;
 
   @override
   Widget build(BuildContext context) {
@@ -479,6 +493,12 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
                   Marker(
                     markerId: const MarkerId('one'),
                     position: _initialPosition,
+                    infoWindow: widget.showInfoWindowOnPin == true
+                        ? InfoWindow(
+                            title: widget.infoWindowTitle,
+                            snippet: infoWindowSnippet,
+                          )
+                        : InfoWindow.noText,
                   ),
                 },
                 myLocationButtonEnabled: false,
@@ -776,6 +796,10 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
   void onMapTap(LatLng position) async {
     _initialPosition = position;
     setState(() {});
+    widget.infoWindowSnippetBuilder?.call(_initialPosition).then((value) {
+      infoWindowSnippet = value;
+      setState(() {});
+    });
     final controller = await _controller.future;
     Future.delayed(const Duration(milliseconds: 200), () {
       controller.animateCamera(
