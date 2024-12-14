@@ -410,6 +410,8 @@ class MapLocationPicker extends StatefulWidget {
 }
 
 class _MapLocationPickerState extends State<MapLocationPicker> {
+  var screenCoordinate = const ScreenCoordinate(x: 0, y: 0);
+
   /// Map controller for movement & zoom
   final Completer<GoogleMapController> _controller = Completer();
 
@@ -459,66 +461,71 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
         body: Stack(
           children: [
             /// Google map view
-            GoogleMap(
-              minMaxZoomPreference: widget.minMaxZoomPreference,
-              onCameraMove: (CameraPosition position) {
-                /// set zoom level
-                _zoom = position.zoom;
-              },
-              initialCameraPosition: CameraPosition(
-                target: _initialPosition,
-                zoom: _zoom,
-              ),
-              onTap: (LatLng position) async {
-                _initialPosition = position;
-                final controller = await _controller.future;
-                controller.animateCamera(
-                  CameraUpdate.newCameraPosition(cameraPosition()),
-                );
-                _decodeAddress(
-                  Location(
-                    lat: position.latitude,
-                    lng: position.longitude,
-                  ),
-                );
-                setState(() {});
-              },
-              onMapCreated: (GoogleMapController controller) => _controller.complete(controller),
-              markers: {
-                Marker(
-                  markerId: const MarkerId('one'),
-                  position: _initialPosition,
+            MouseRegion(
+              onHover: updateLocation,
+              child: GoogleMap(
+                minMaxZoomPreference: widget.minMaxZoomPreference,
+                onCameraMove: (CameraPosition position) {
+                  /// set zoom level
+                  _zoom = position.zoom;
+                },
+                initialCameraPosition: CameraPosition(
+                  target: _initialPosition,
+                  zoom: _zoom,
                 ),
-              },
-              myLocationButtonEnabled: false,
-              myLocationEnabled: true,
-              zoomControlsEnabled: false,
-              padding: widget.padding,
-              compassEnabled: widget.compassEnabled,
-              liteModeEnabled: widget.liteModeEnabled,
-              mapType: widget.mapType,
-              style: widget.mapStyle,
-              buildingsEnabled: widget.buildingsEnabled,
-              cameraTargetBounds: widget.cameraTargetBounds,
-              circles: widget.circles,
-              cloudMapId: widget.cloudMapId,
-              fortyFiveDegreeImageryEnabled: widget.fortyFiveDegreeImageryEnabled,
-              gestureRecognizers: widget.gestureRecognizers,
-              indoorViewEnabled: widget.indoorViewEnabled,
-              layoutDirection: widget.layoutDirection,
-              mapToolbarEnabled: widget.mapToolbarEnabled,
-              onCameraIdle: widget.onCameraIdle,
-              onCameraMoveStarted: widget.onCameraMoveStarted,
-              onLongPress: widget.onLongPress,
-              polygons: widget.polygons,
-              polylines: widget.polylines,
-              rotateGesturesEnabled: widget.rotateGesturesEnabled,
-              scrollGesturesEnabled: widget.scrollGesturesEnabled,
-              tileOverlays: widget.tileOverlays,
-              tiltGesturesEnabled: widget.tiltGesturesEnabled,
-              trafficEnabled: widget.trafficEnabled,
-              webGestureHandling: widget.webGestureHandling,
-              zoomGesturesEnabled: widget.zoomGesturesEnabled,
+                onTap: onMapTap,
+                onMapCreated: (GoogleMapController controller) => _controller.complete(controller),
+                markers: {
+                  Marker(
+                    markerId: const MarkerId('one'),
+                    position: _initialPosition,
+                  ),
+                },
+                myLocationButtonEnabled: false,
+                myLocationEnabled: true,
+                zoomControlsEnabled: false,
+                padding: widget.padding,
+                compassEnabled: widget.compassEnabled,
+                liteModeEnabled: widget.liteModeEnabled,
+                mapType: widget.mapType,
+                style: widget.mapStyle,
+                buildingsEnabled: widget.buildingsEnabled,
+                cameraTargetBounds: widget.cameraTargetBounds,
+                circles: widget.circles,
+                cloudMapId: widget.cloudMapId,
+                fortyFiveDegreeImageryEnabled: widget.fortyFiveDegreeImageryEnabled,
+                gestureRecognizers: widget.gestureRecognizers,
+                indoorViewEnabled: widget.indoorViewEnabled,
+                layoutDirection: widget.layoutDirection,
+                mapToolbarEnabled: widget.mapToolbarEnabled,
+                onCameraIdle: widget.onCameraIdle,
+                onCameraMoveStarted: widget.onCameraMoveStarted,
+                onLongPress: widget.onLongPress,
+                polygons: widget.polygons.map((e) {
+                  var polygon = Polygon(
+                    points: e.points,
+                    onTap: () {
+                      Future.delayed(Duration.zero, () async {
+                        final controller = await _controller.future;
+                        LatLng latLngPosition = await controller.getLatLng(screenCoordinate);
+                        onMapTap(latLngPosition);
+                      });
+
+                      e.onTap?.call();
+                    },
+                    polygonId: e.polygonId,
+                  );
+                  return polygon;
+                }).toSet(),
+                polylines: widget.polylines,
+                rotateGesturesEnabled: widget.rotateGesturesEnabled,
+                scrollGesturesEnabled: widget.scrollGesturesEnabled,
+                tileOverlays: widget.tileOverlays,
+                tiltGesturesEnabled: widget.tiltGesturesEnabled,
+                trafficEnabled: widget.trafficEnabled,
+                webGestureHandling: widget.webGestureHandling,
+                zoomGesturesEnabled: widget.zoomGesturesEnabled,
+              ),
             ),
             Column(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -604,6 +611,7 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: FloatingActionButton(
+                      heroTag: UniqueKey(),
                       onPressed: null,
                       tooltip: 'Map Type',
                       backgroundColor: Theme.of(context).primaryColor,
@@ -644,6 +652,7 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: FloatingActionButton(
+                      heroTag: UniqueKey(),
                       tooltip: widget.fabTooltip,
                       backgroundColor: Theme.of(context).primaryColor,
                       foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -753,6 +762,27 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
         ),
       ),
     );
+  }
+
+  Future<void> updateLocation(PointerEvent details) async {
+    screenCoordinate = ScreenCoordinate(x: details.localPosition.dx.round(), y: details.localPosition.dy.round());
+  }
+
+  void onMapTap(LatLng position) async {
+    _initialPosition = position;
+    setState(() {});
+    final controller = await _controller.future;
+    Future.delayed(const Duration(milliseconds: 200), () {
+      controller.animateCamera(
+        CameraUpdate.newCameraPosition(cameraPosition()),
+      );
+      _decodeAddress(
+        Location(
+          lat: position.latitude,
+          lng: position.longitude,
+        ),
+      );
+    });
   }
 
   /// Camera position moved to location
