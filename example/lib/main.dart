@@ -125,7 +125,7 @@ class _MyAppState extends State<MyApp> {
                       return MapLocationPicker(
                         apiKey: API_KEY,
                         popOnNextButtonTaped: true,
-                        currentLatLng: const LatLng(-73.9401555, 40.5955599),
+                        currentLatLng: const LatLng(40.6744146, -73.9406231),
                         debounceDuration: const Duration(milliseconds: 500),
                         onNext: (GeocodingResult? result) {
                           if (result != null) {
