@@ -306,6 +306,8 @@ class MapLocationPicker extends StatefulWidget {
   /// InfoWindow snippet builder for pin
   final Future<String> Function(LatLng position)? infoWindowSnippetBuilder;
 
+  /// On tap function that will contain position where map was tapped
+  final Function(LatLng position)? onMapTap;
   final InputDecoration? decoration;
 
   final Widget? Function(
@@ -415,6 +417,7 @@ class MapLocationPicker extends StatefulWidget {
     this.showInfoWindowOnPin,
     this.infoWindowTitle,
     this.infoWindowSnippetBuilder,
+    this.onMapTap,
   });
 
   @override
@@ -794,6 +797,8 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
   }
 
   void onMapTap(LatLng position) async {
+    widget.onMapTap?.call(position);
+
     _initialPosition = position;
     setState(() {});
     widget.infoWindowSnippetBuilder?.call(_initialPosition).then((value) {
