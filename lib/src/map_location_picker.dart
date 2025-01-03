@@ -170,7 +170,7 @@ class MapLocationPicker extends StatefulWidget {
   final TextEditingController? searchController;
 
   /// Add your own custom markers
-  final Map<String, LatLng>? additionalMarkers;
+  final Set<Marker>? markers;
 
   /// Safe area parameters (default: true)
   final bool bottom;
@@ -319,12 +319,19 @@ class MapLocationPicker extends StatefulWidget {
   /// Duration for search debounce in milliseconds
   final Duration debounceDuration;
 
+  /// initial zoom level
+  final double zoom;
+
+  final bool showCurrentLocationPin;
+
   const MapLocationPicker({
     super.key,
     this.desiredAccuracy = LocationAccuracy.high,
     required this.apiKey,
     this.geoCodingBaseUrl,
+    this.zoom = 18.0,
     this.geoCodingHttpClient,
+    this.showCurrentLocationPin = true,
     this.geoCodingApiHeaders,
     this.language,
     this.locationType = const [],
@@ -373,7 +380,7 @@ class MapLocationPicker extends StatefulWidget {
     this.mapType = MapType.normal,
     this.hideSearchBar = false,
     this.searchController,
-    this.additionalMarkers,
+    this.markers,
     this.bottom = true,
     this.left = true,
     this.maintainBottomViewPadding = false,
@@ -439,9 +446,6 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
   /// Map type (default: MapType.normal)
   late MapType _mapType = MapType.normal;
 
-  /// initial zoom level
-  late double _zoom = 18.0;
-
   /// GeoCoding result for further use
   GeocodingResult? _geocodingResult;
 
@@ -453,25 +457,27 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
 
   String? infoWindowSnippet;
 
+  late double _zoom;
+
   @override
   Widget build(BuildContext context) {
-    final additionalMarkers = widget.additionalMarkers?.entries
-            .map(
-              (e) => Marker(
-                markerId: MarkerId(e.key),
-                position: e.value,
-              ),
-            )
-            .toList() ??
-        [];
+    _zoom = widget.zoom;
 
-    final markers = Set<Marker>.from(additionalMarkers);
-    markers.add(
-      Marker(
-        markerId: const MarkerId("one"),
-        position: _initialPosition,
-      ),
-    );
+    final markers = widget.markers ?? {};
+    if (widget.showCurrentLocationPin) {
+      markers.add(
+        Marker(
+          markerId: const MarkerId("one"),
+          position: _initialPosition,
+          infoWindow: widget.showInfoWindowOnPin == true
+              ? InfoWindow(
+                  title: widget.infoWindowTitle,
+                  snippet: infoWindowSnippet,
+                )
+              : InfoWindow.noText,
+        ),
+      );
+    }
     return PopScope(
       canPop: Navigator.of(context).userGestureInProgress,
       child: Scaffold(
@@ -492,18 +498,7 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
                 ),
                 onTap: onMapTap,
                 onMapCreated: (GoogleMapController controller) => _controller.complete(controller),
-                markers: {
-                  Marker(
-                    markerId: const MarkerId('one'),
-                    position: _initialPosition,
-                    infoWindow: widget.showInfoWindowOnPin == true
-                        ? InfoWindow(
-                            title: widget.infoWindowTitle,
-                            snippet: infoWindowSnippet,
-                          )
-                        : InfoWindow.noText,
-                  ),
-                },
+                markers: markers,
                 myLocationButtonEnabled: false,
                 myLocationEnabled: true,
                 zoomControlsEnabled: false,
