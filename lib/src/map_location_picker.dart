@@ -459,25 +459,11 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
 
   late double _zoom;
 
+
   @override
   Widget build(BuildContext context) {
     _zoom = widget.zoom;
 
-    final markers = widget.markers ?? {};
-    if (widget.showCurrentLocationPin) {
-      markers.add(
-        Marker(
-          markerId: const MarkerId("one"),
-          position: _initialPosition,
-          infoWindow: widget.showInfoWindowOnPin == true
-              ? InfoWindow(
-                  title: widget.infoWindowTitle,
-                  snippet: infoWindowSnippet,
-                )
-              : InfoWindow.noText,
-        ),
-      );
-    }
     return PopScope(
       canPop: Navigator.of(context).userGestureInProgress,
       child: Scaffold(
@@ -832,6 +818,21 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
         Location(
           lat: _initialPosition.latitude,
           lng: _initialPosition.longitude,
+        ),
+      );
+    }
+    final markers = widget.markers ?? {};
+    if (widget.showCurrentLocationPin) {
+      markers.add(
+        Marker(
+          markerId: const MarkerId("one"),
+          position: _initialPosition,
+          infoWindow: widget.showInfoWindowOnPin == true
+              ? InfoWindow(
+            title: widget.infoWindowTitle,
+            snippet: infoWindowSnippet,
+          )
+              : InfoWindow.noText,
         ),
       );
     }
