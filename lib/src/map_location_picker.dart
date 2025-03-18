@@ -459,6 +459,7 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
 
   late double _zoom;
 
+  late Set<Marker> markers;
 
   @override
   Widget build(BuildContext context) {
@@ -821,7 +822,7 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
         ),
       );
     }
-    final markers = widget.markers ?? {};
+    markers = widget.markers ?? {};
     if (widget.showCurrentLocationPin) {
       markers.add(
         Marker(
