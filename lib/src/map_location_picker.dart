@@ -459,7 +459,7 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
 
   late double _zoom;
 
-  late Set<Marker> markers;
+  late Map<MarkerId, Marker> markers;
 
   @override
   Widget build(BuildContext context) {
@@ -485,7 +485,7 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
                 ),
                 onTap: onMapTap,
                 onMapCreated: (GoogleMapController controller) => _controller.complete(controller),
-                markers: markers,
+                markers: markers.values.toSet(),
                 myLocationButtonEnabled: false,
                 myLocationEnabled: true,
                 zoomControlsEnabled: false,
@@ -782,6 +782,7 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
     widget.onMapTap?.call(position);
 
     _initialPosition = position;
+    _setCurrentLocationMarker();
     setState(() {});
     widget.infoWindowSnippetBuilder?.call(_initialPosition).then((value) {
       infoWindowSnippet = value;
@@ -822,22 +823,25 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
         ),
       );
     }
-    markers = widget.markers ?? {};
-    if (widget.showCurrentLocationPin) {
-      markers.add(
-        Marker(
-          markerId: const MarkerId("one"),
-          position: _initialPosition,
-          infoWindow: widget.showInfoWindowOnPin == true
-              ? InfoWindow(
-            title: widget.infoWindowTitle,
-            snippet: infoWindowSnippet,
-          )
-              : InfoWindow.noText,
-        ),
-      );
-    }
+    markers = {for (var marker in widget.markers ?? {}) marker.markerId: marker};
+    _setCurrentLocationMarker();
     super.initState();
+  }
+
+  void _setCurrentLocationMarker() {
+    if (!widget.showCurrentLocationPin) return;
+    final currentLocationMarkerId = const MarkerId("currentLocation");
+    final currentLocationMarker = Marker(
+      markerId: currentLocationMarkerId,
+      position: _initialPosition,
+      infoWindow: widget.showInfoWindowOnPin == true
+          ? InfoWindow(
+              title: widget.infoWindowTitle,
+              snippet: infoWindowSnippet,
+            )
+          : InfoWindow.noText,
+    );
+    markers[currentLocationMarkerId] = currentLocationMarker;
   }
 
   /// Decode address from latitude & longitude
